@@ -6,7 +6,7 @@ FlowerBook, amatör "bitki ebeveynleri" için tasarlanmış, AI destekli bitki t
 
 ## ✨ Özellikler
 
-- **📸 Magic Camera**: Genkit ve Google AI (Gemini) kullanarak bitkilerinizi saniyeler içinde tanımlayın.
+- **📸 Magic Camera**: Genkit ve Google AI (Gemini 2.5 Flash) kullanarak bitkilerinizi saniyeler içinde tanımlayın.
 - **🌿 Blooming Feed**: Diğer bitki severlerin paylaşımlarını görün, yıldız verin ve popüler bitkileri keşfedin.
 - **🏡 My Garden**: Kendi bitkilerinizi takip edebileceğiniz, büyüme durumlarını ve "mutluluk metresini" görebileceğiniz dijital rafınız.
 - **💬 Plant Whisperer**: Tanımlanan her bitki için AI tarafından oluşturulan sulama, ışık ve bakım tavsiyeleri.
@@ -17,9 +17,9 @@ FlowerBook, amatör "bitki ebeveynleri" için tasarlanmış, AI destekli bitki t
 - **Frontend**: [Next.js 15](https://nextjs.org/) (App Router), [Tailwind CSS](https://tailwindcss.com/)
 - **UI Bileşenleri**: [Shadcn UI](https://ui.shadcn.com/), Lucide Icons
 - **Backend**: [Firebase](https://firebase.google.com/) (Auth, Firestore, Storage)
-- **Yapay Zeka**: [Genkit](https://firebase.google.com/docs/genkit) & Google Gemini 2.0 Flash
+- **Yapay Zeka**: [Genkit](https://firebase.google.com/docs/genkit) & Google Gemini 2.5 Flash
 
-## 🚀 Başlangıç
+## 🚀 Kurulum ve Başlangıç
 
 Projeyi yerel ortamınızda çalıştırmak için:
 
@@ -39,10 +39,10 @@ Projeyi yerel ortamınızda çalıştırmak için:
 
 ## 🎨 Tasarım Dili
 
-- **Ana Renk**: Terracotta (`#C4673B`) - Doğal ve sıcak bir his için.
-- **Arka Plan**: Soft Beige (`#FAF7F5`) - Göz yormayan, organik bir zemin.
-- **Vurgu**: Dusty Rose (`#EBABA9`) - Çiçeksi ve nazik detaylar için.
-- **Tipografi**: PT Sans - Okunabilir ve modern.
+- **Ana Renk**: Terracotta (`#C4673B`) - Doğal ve sıcak bir his.
+- **Arka Plan**: Soft Beige (`#FAF7F5`) - Organik bir zemin.
+- **Vurgu**: Dusty Rose (`#EBABA9`) - Çiçeksi detaylar.
+- **Tipografi**: PT Sans - Modern ve okunabilir.
 
 ---
 *Bu proje Firebase Studio kullanılarak prototiplenmiştir.*
