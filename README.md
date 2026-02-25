@@ -1,20 +1,37 @@
-# FlowerBook
+# 🌸 FlowerBook
 
-FlowerBook is a hybrid mobile application that combines AI-powered plant identification with a niche social network for amateur "plant parents."
+FlowerBook, amatör "bitki ebeveynleri" için tasarlanmış, AI destekli bitki tanımlama ve niş bir sosyal ağ deneyimi sunan hibrit bir mobil web uygulamasıdır.
 
-## Core Features
-- **The Magic Camera**: Identify plants using Google Vision AI / Genkit Flows.
-- **Blooming**: A global feed of public plant posts with interactive star ratings and nearby filters.
-- **My Garden**: A private shelf-view sanctuary for tracking your personal plant growth and garden happiness.
-- **Plant Whisperer**: Detailed AI-generated care recommendations.
+## ✨ Özellikler
 
-## Tech Stack
-- **Frontend**: Next.js (App Router), Tailwind CSS, Framer Motion, Lucide Icons.
-- **Backend**: Firebase Auth, Firestore, Storage.
-- **AI**: Genkit with Google AI (identifyPlantAndRecommendCare flow).
+- **📸 Sihirli Kamera**: Genkit ve Google AI (Gemini) kullanarak bitkilerinizi saniyeler içinde tanımlayın.
+- **🌿 Blooming Feed**: Diğer bitki severlerin paylaşımlarını görün, yıldız verin ve yakındaki bitkileri keşfedin.
+- **🏡 Bahçem**: Kendi bitkilerinizi takip edebileceğiniz, büyüme durumlarını ve mutluluk metresini görebileceğiniz özel alanınız.
+- **💬 Bitki Fısıltısı**: Tanımlanan her bitki için AI tarafından oluşturulan sulama, ışık ve bakım tavsiyeleri.
+- **🏆 Başarılar**: Bakım yaptıkça "Wise Plane Tree" gibi rütbeler kazanın ve toplulukta yükselin.
 
-## Design Language
-- **Primary Color**: Terracotta (#C4673B)
-- **Background**: Soft Beige (#FAF7F5)
-- **Accent**: Dusty Rose (#EBABA9)
-- **Typography**: PT Sans
+## 🛠️ Teknoloji Yığını
+
+- **Frontend**: [Next.js 15](https://nextjs.org/) (App Router), [Tailwind CSS](https://tailwindcss.com/)
+- **UI Bileşenleri**: [Shadcn UI](https://ui.shadcn.com/), Framer Motion, Lucide Icons
+- **Backend**: [Firebase](https://firebase.google.com/) (Auth, Firestore, Storage)
+- **Yapay Zeka**: [Genkit](https://firebase.google.com/docs/genkit) & Google Gemini AI
+
+## 🚀 Başlangıç
+
+Projeyi yerel ortamınızda çalıştırmak için:
+
+1. Depoyu klonlayın: `git clone <repo-url>`
+2. Bağımlılıkları yükleyin: `npm install`
+3. `.env` dosyasını oluşturun ve Firebase/Gemini API anahtarlarınızı ekleyin.
+4. Geliştirme sunucusunu başlatın: `npm run dev`
+
+## 🎨 Tasarım Dili
+
+- **Ana Renk**: Terracotta (#C4673B) - Doğal ve sıcak bir his için.
+- **Arka Plan**: Soft Beige (#FAF7F5) - Göz yormayan, organik bir zemin.
+- **Vurgu**: Dusty Rose (#EBABA9) - Çiçeksi ve nazik detaylar için.
+- **Tipografi**: PT Sans - Okunabilir ve modern.
+
+---
+*Bu proje Firebase Studio kullanılarak prototiplenmiştir.*
