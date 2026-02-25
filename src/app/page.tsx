@@ -1,3 +1,5 @@
+import BloomingFeed from "./blooming/page";
+
 export default function Home() {
-  return <></>;
+  return <BloomingFeed />;
 }

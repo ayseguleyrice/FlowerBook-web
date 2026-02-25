@@ -1,3 +1,22 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-plant",
+      "description": "A beautiful monstera plant in a terracotta pot",
+      "imageUrl": "https://images.unsplash.com/photo-1545165375-1b744b9ed444?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtb25zdGVyYSUyMHBsYW50fGVufDB8fHx8MTc3MjAzMDQ3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "monstera plant"
+    },
+    {
+      "id": "succulent-collection",
+      "description": "Various succulents on a shelf",
+      "imageUrl": "https://images.unsplash.com/photo-1763147635949-b9b9940cde3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzdWNjdWxlbnQlMjBjb2xsZWN0aW9ufGVufDB8fHx8MTc3MjA1Nzc4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "succulent collection"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Friendly plant lover avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1651534400411-eaf227f82ee4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NzE5OTAxNTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait person"
+    }
+  ]
 }
