@@ -1,22 +1,53 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Navigation } from "@/components/Navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Settings, Flower, Star, Users, MapPin } from "lucide-react"
+import { getAcceptedFriendCount, getCurrentUserProfile } from "@/lib/firestore"
+import type { User } from "@/lib/types"
 
 export default function ProfilePage() {
-  const user = {
-    displayName: "Jane Botanist",
-    username: "@janeplants",
-    avatar: "https://picsum.photos/seed/jane/200/200",
-    rank: "Wise Plane Tree",
-    totalStars: 1240,
-    gardenHappiness: 92,
-    location: "Portland, OR"
+  const [friendCount, setFriendCount] = useState(0)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const [profile, acceptedFriends] = await Promise.all([
+          getCurrentUserProfile(),
+          getAcceptedFriendCount(),
+        ])
+
+        setUser(profile)
+        setFriendCount(acceptedFriends)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    run()
+  }, [])
+
+  if (!user) {
+    return (
+      <main className="min-h-screen bg-background pb-24 px-4 py-8">
+        <div className="max-w-md mx-auto space-y-4">
+          <div className="h-32 rounded-2xl bg-muted animate-pulse" />
+          <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+          <div className="h-40 rounded-2xl bg-muted animate-pulse" />
+        </div>
+        <Navigation />
+      </main>
+    )
   }
+
+  const locationText = user.location
+    ? `${user.location.latitude.toFixed(3)}, ${user.location.longitude.toFixed(3)}`
+    : "Konum eklenmedi"
 
   return (
     <main className="min-h-screen bg-background pb-24 px-4 py-8">
@@ -28,14 +59,14 @@ export default function ProfilePage() {
 
       <div className="flex flex-col items-center mb-8">
         <Avatar className="h-32 w-32 border-4 border-white shadow-xl mb-4">
-          <AvatarImage src={user.avatar} />
+          <AvatarImage src={user.avatarUrl} />
           <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
         </Avatar>
         <h2 className="text-2xl font-bold">{user.displayName}</h2>
-        <p className="text-muted-foreground text-sm">{user.username}</p>
+        <p className="text-muted-foreground text-sm">@{user.username}</p>
         <div className="flex items-center mt-2 text-xs text-muted-foreground">
           <MapPin size={12} className="mr-1" />
-          {user.location}
+          {locationText}
         </div>
         <Badge className="mt-4 bg-primary text-primary-foreground px-4 py-1 rounded-full">
           {user.rank}
@@ -53,7 +84,7 @@ export default function ProfilePage() {
         <Card className="border-none shadow-md bg-card">
           <CardContent className="p-4 flex flex-col items-center">
             <Users className="text-primary mb-1" />
-            <span className="text-lg font-bold">42</span>
+            <span className="text-lg font-bold">{friendCount}</span>
             <span className="text-[10px] uppercase text-muted-foreground tracking-wider">Friend Group</span>
           </CardContent>
         </Card>

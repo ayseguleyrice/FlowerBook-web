@@ -2,23 +2,25 @@
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Camera, Upload, Loader2, X, Check, Globe, Lock } from "lucide-react"
+import { Camera, Loader2, X, Globe, Lock, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { Navigation } from "@/components/Navigation"
-import { identifyPlantAndRecommendCare, type IdentifyPlantAndRecommendCareOutput } from "@/ai/flows/identify-plant-and-recommend-care"
+import type { IdentifyPlantAndRecommendCareOutput } from "@/ai/flows/identify-plant-and-recommend-care"
+import { createPost, updateMyLocation, uploadTemporaryImage } from "@/lib/firestore"
 import Image from "next/image"
 
 export default function CameraPage() {
   const [image, setImage] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [description, setDescription] = useState("")
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [result, setResult] = useState<IdentifyPlantAndRecommendCareOutput | null>(null)
-  const [isPublic, setIsPublic] = useState(true)
+  const [temporaryPhotoUrl, setTemporaryPhotoUrl] = useState<string | null>(null)
   const [nickname, setNickname] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -26,22 +28,57 @@ export default function CameraPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setSelectedFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
         setImage(reader.result as string)
+        setResult(null)
       }
       reader.readAsDataURL(file)
     }
   }
 
+  const getCurrentLocation = () =>
+    new Promise<{ latitude: number; longitude: number } | undefined>((resolve) => {
+      if (!navigator.geolocation) {
+        resolve(undefined)
+        return
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          })
+        },
+        () => resolve(undefined),
+        { enableHighAccuracy: true, timeout: 5000 }
+      )
+    })
+
   const handleIdentify = async () => {
-    if (!image) return
+    if (!image || !selectedFile) return
     setLoading(true)
     try {
-      const res = await identifyPlantAndRecommendCare({
-        photoDataUri: image,
-        description: description || "No description provided"
+      const upload = await uploadTemporaryImage(selectedFile)
+      setTemporaryPhotoUrl(upload.downloadUrl)
+
+      const response = await fetch("/api/identify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photoDataUri: image,
+          description: description || "No description provided",
+        }),
       })
+
+      if (!response.ok) {
+        const body = (await response.json()) as { error?: string }
+        throw new Error(body.error || "Failed to identify plant")
+      }
+
+      const res = (await response.json()) as IdentifyPlantAndRecommendCareOutput
       setResult(res)
     } catch (error) {
       console.error(error)
@@ -51,10 +88,52 @@ export default function CameraPage() {
     }
   }
 
-  const handleSavePost = () => {
-    // In a real app, this would save to Firestore
-    alert(`Post saved to ${isPublic ? 'Blooming Feed' : 'My Garden'}!`)
-    router.push(isPublic ? "/" : "/garden")
+  const handleFinish = async (mode: "info" | "private" | "public") => {
+    if (!result) return
+
+    if (mode === "info") {
+      setResult(null)
+      setImage(null)
+      setSelectedFile(null)
+      setTemporaryPhotoUrl(null)
+      setNickname("")
+      return
+    }
+
+    if (!temporaryPhotoUrl) {
+      alert("Photo upload is missing. Please retry.")
+      return
+    }
+
+    setSaving(true)
+    try {
+      const location = await getCurrentLocation()
+      if (location) {
+        await updateMyLocation(location)
+      }
+
+      await createPost({
+        photoUrl: temporaryPhotoUrl,
+        plantCommonName: result.identification.commonName,
+        nickname,
+        privacyStatus: mode,
+        location,
+        careInfo: {
+          watering: result.careRecommendations.watering,
+          pruning: result.careRecommendations.pruning,
+          light: result.careRecommendations.light,
+          humidity: result.careRecommendations.humidity,
+          toxicity: result.careRecommendations.toxicity,
+        },
+      })
+
+      router.push(mode === "public" ? "/blooming" : "/garden")
+    } catch (error) {
+      console.error(error)
+      alert("Failed to save this plant post.")
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (result) {
@@ -84,6 +163,10 @@ export default function CameraPage() {
                    <p className="font-bold text-primary mb-1">Watering</p>
                    <p>{result.careRecommendations.watering}</p>
                  </div>
+                 <div className="p-3 bg-secondary rounded-lg">
+                   <p className="font-bold text-primary mb-1">Pruning</p>
+                   <p>{result.careRecommendations.pruning}</p>
+                 </div>
                  <div className="p-3 bg-accent/10 rounded-lg">
                    <p className="font-bold text-accent-foreground mb-1">Light</p>
                    <p>{result.careRecommendations.light}</p>
@@ -98,7 +181,7 @@ export default function CameraPage() {
           </Card>
 
           <Card className="p-6 border-none shadow-md">
-            <h3 className="font-bold mb-4">Post to FlowerBook</h3>
+            <h3 className="font-bold mb-4">Ne yapmak istersin?</h3>
             <div className="space-y-4">
                <div>
                  <Label htmlFor="nickname">Plant Nickname</Label>
@@ -109,15 +192,32 @@ export default function CameraPage() {
                    onChange={(e) => setNickname(e.target.value)} 
                  />
                </div>
-               <div className="flex items-center justify-between py-2">
-                 <div className="flex items-center space-x-2">
-                    {isPublic ? <Globe className="text-primary" size={18} /> : <Lock className="text-muted-foreground" size={18} />}
-                    <span className="text-sm font-medium">{isPublic ? 'Public Post (Blooming)' : 'Private Garden'}</span>
-                 </div>
-                 <Switch checked={isPublic} onCheckedChange={setIsPublic} />
-               </div>
-               <Button onClick={handleSavePost} className="w-full h-12 text-lg">
-                 <Check className="mr-2" /> Finish Planting
+
+               <Button
+                 variant="outline"
+                 onClick={() => handleFinish("info")}
+                 className="w-full h-11"
+                 disabled={saving}
+               >
+                 <BookOpen className="mr-2" /> Sadece Bilgi Al
+               </Button>
+
+               <Button
+                 variant="secondary"
+                 onClick={() => handleFinish("private")}
+                 className="w-full h-11"
+                 disabled={saving}
+               >
+                 <Lock className="mr-2" /> Save to My Garden (Private)
+               </Button>
+
+               <Button
+                 onClick={() => handleFinish("public")}
+                 className="w-full h-12 text-lg"
+                 disabled={saving}
+               >
+                 {saving ? <Loader2 className="mr-2 animate-spin" /> : <Globe className="mr-2" />}
+                 Share to Blooming (Global)
                </Button>
             </div>
           </Card>

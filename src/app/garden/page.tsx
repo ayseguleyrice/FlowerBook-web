@@ -1,22 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Navigation } from "@/components/Navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Leaf, History, Sparkles, Droplets } from "lucide-react"
 import Image from "next/image"
+import { calculateGardenHappinessFromPosts, getMyPosts } from "@/lib/firestore"
+import type { Post } from "@/lib/types"
 
 export default function MyGarden() {
-  const [happiness] = useState(85)
-  
-  const myPlants = [
-    { id: 1, name: "Monstera Deliciosa", nickname: "Monty", image: "https://picsum.photos/seed/plant1/200/200", status: "Healthy" },
-    { id: 2, name: "Snake Plant", nickname: "Sly", image: "https://picsum.photos/seed/plant2/200/200", status: "Needs Water" },
-    { id: 3, name: "Pothos", nickname: "Ivy", image: "https://picsum.photos/seed/plant3/200/200", status: "Growing" },
-    { id: 4, name: "Fiddle Leaf Fig", nickname: "Figgy", image: "https://picsum.photos/seed/plant4/200/200", status: "Healthy" },
-  ]
+  const [happiness, setHappiness] = useState(0)
+  const [myPlants, setMyPlants] = useState<Post[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const posts = await getMyPosts()
+        setMyPlants(posts)
+        setHappiness(calculateGardenHappinessFromPosts(posts))
+      } catch (error) {
+        console.error(error)
+        setMyPlants([])
+        setHappiness(0)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    run()
+  }, [])
 
   return (
     <main className="min-h-screen bg-background pb-24 px-4 py-8">
@@ -46,42 +61,52 @@ export default function MyGarden() {
       </header>
 
       <section className="max-w-md mx-auto relative px-2">
-        {/* Shelf Background Logic */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-12">
-          {myPlants.map((plant, idx) => (
-            <div key={plant.id} className="relative group">
-              {/* Wooden Shelf Indicator */}
-              <div className="absolute -bottom-4 left-0 right-0 h-4 bg-[#8B4513] rounded-sm shadow-md shelf-gradient" />
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="aspect-square rounded-2xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : myPlants.length === 0 ? (
+          <Card className="p-6 text-center text-sm text-muted-foreground">
+            Bahçen henüz boş. Magic Camera ile ilk bitkini ekle 🌿
+          </Card>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-12">
+            {myPlants.map((plant) => (
+              <div key={plant.postId} className="relative group">
+                <div className="absolute -bottom-4 left-0 right-0 h-4 bg-secondary rounded-sm shadow-md shelf-gradient" />
               
-              <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-white shadow-lg group-hover:scale-105 transition-transform duration-300">
-                <Image src={plant.image} alt={plant.name} fill className="object-cover" />
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/40 backdrop-blur-sm text-white">
-                  <p className="text-xs font-bold truncate">{plant.nickname}</p>
-                  <p className="text-[8px] opacity-80 truncate">{plant.name}</p>
+                <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-white shadow-lg group-hover:scale-105 transition-transform duration-300">
+                  <Image src={plant.photoUrl} alt={plant.plantCommonName} fill className="object-cover" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/40 backdrop-blur-sm text-white">
+                    <p className="text-xs font-bold truncate">{plant.nickname || "İsimsiz"}</p>
+                    <p className="text-[8px] opacity-80 truncate">{plant.plantCommonName}</p>
+                  </div>
+                  {plant.careInfo?.watering && (
+                    <div className="absolute top-2 right-2 bg-accent rounded-full p-1 text-accent-foreground animate-bounce">
+                      <Droplets size={12} />
+                    </div>
+                  )}
                 </div>
-                {plant.status === "Needs Water" && (
-                   <div className="absolute top-2 right-2 bg-blue-500 rounded-full p-1 text-white animate-bounce">
-                     <Droplets size={12} />
-                   </div>
-                )}
-              </div>
               
-              <div className="mt-6 flex flex-col items-center">
-                <Badge variant={plant.status === "Needs Water" ? "destructive" : "secondary"} className="text-[8px] px-1 h-4">
-                  {plant.status}
-                </Badge>
-                <div className="flex mt-1 space-x-1">
-                   <button className="p-1 rounded-full bg-primary/5 hover:bg-primary/20 transition-colors">
-                     <History size={14} className="text-primary" />
-                   </button>
-                   <button className="p-1 rounded-full bg-primary/5 hover:bg-primary/20 transition-colors">
-                     <Sparkles size={14} className="text-primary" />
-                   </button>
+                <div className="mt-6 flex flex-col items-center">
+                  <Badge variant={plant.privacyStatus === "private" ? "secondary" : "outline"} className="text-[8px] px-1 h-4">
+                    {plant.privacyStatus === "private" ? "Private" : "Public"}
+                  </Badge>
+                  <div className="flex mt-1 space-x-1">
+                    <button className="p-1 rounded-full bg-primary/5 hover:bg-primary/20 transition-colors">
+                      <History size={14} className="text-primary" />
+                    </button>
+                    <button className="p-1 rounded-full bg-primary/5 hover:bg-primary/20 transition-colors">
+                      <Sparkles size={14} className="text-primary" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <Navigation />

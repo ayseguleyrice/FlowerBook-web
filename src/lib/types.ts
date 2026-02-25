@@ -1,4 +1,4 @@
-export type UserRank = 'Seedling' | 'Wise Plane Tree' | 'Doctor';
+export type UserRank = 'Filiz Üye' | 'Bilge Çınar' | 'Bitki Doktoru';
 
 export interface User {
   uid: string;
@@ -19,7 +19,7 @@ export interface Post {
   ownerName: string;
   ownerAvatar?: string;
   photoUrl: string;
-  plantName: string;
+  plantCommonName: string;
   nickname: string;
   privacyStatus: PrivacyStatus;
   location?: { latitude: number; longitude: number };
@@ -45,7 +45,7 @@ export interface Comment {
   authorAvatar?: string;
   text: string;
   type: CommentType;
-  parentCommentId?: string;
+  parentCommentId?: string | null;
   timestamp: number;
 }
 

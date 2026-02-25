@@ -32,6 +32,7 @@ Projeyi yerel ortamınızda çalıştırmak için:
    npm install
    ```
 3. `.env` dosyasını oluşturun ve Firebase/Gemini API anahtarlarınızı ekleyin.
+   - Örnek değişkenler için `.env.example` dosyasını kullanın.
 4. Geliştirme sunucusunu başlatın:
    ```bash
    npm run dev

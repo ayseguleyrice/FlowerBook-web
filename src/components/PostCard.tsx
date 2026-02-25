@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Star, MessageCircle, MoreVertical, MapPin, Share2 } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
@@ -9,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Post } from "@/lib/types"
+import { submitStars } from "@/lib/firestore"
 
 interface PostCardProps {
   post: Post
@@ -17,11 +19,36 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [rating, setRating] = useState([0])
   const [showParticles, setShowParticles] = useState(false)
+  const [starSum, setStarSum] = useState(post.starSum)
+  const [starCount, setStarCount] = useState(post.starCount)
+  const [submittingRating, setSubmittingRating] = useState(false)
 
-  const handleRatingChange = (val: number[]) => {
+  const handleRatingPreview = (val: number[]) => {
     setRating(val)
+
     if (val[0] === 5) {
       triggerParticles()
+    }
+  }
+
+  const handleRatingCommit = async (val: number[]) => {
+    if (!val[0]) {
+      return
+    }
+
+    if (submittingRating) {
+      return
+    }
+
+    setSubmittingRating(true)
+    try {
+      await submitStars(post.postId, val[0])
+      setStarSum((prev) => prev + val[0])
+      setStarCount((prev) => prev + 1)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setSubmittingRating(false)
     }
   }
 
@@ -56,7 +83,7 @@ export function PostCard({ post }: PostCardProps) {
       <div className="relative aspect-square w-full">
         <Image 
           src={post.photoUrl} 
-          alt={post.plantName} 
+          alt={post.plantCommonName} 
           fill 
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 450px"
@@ -86,7 +113,7 @@ export function PostCard({ post }: PostCardProps) {
         <div className="flex justify-between items-center mb-4">
           <div className="flex space-x-2">
             <Badge variant="secondary" className="bg-primary/5 text-primary border-none">
-              {post.plantName}
+              {post.plantCommonName}
             </Badge>
             {post.nickname && (
               <Badge variant="outline" className="border-primary/20 italic">
@@ -96,7 +123,7 @@ export function PostCard({ post }: PostCardProps) {
           </div>
           <div className="flex items-center space-x-1 text-xs font-semibold text-primary">
             <Star className="h-3 w-3 fill-primary" />
-            <span>{(post.starSum / (post.starCount || 1)).toFixed(1)}</span>
+            <span>{(starSum / (starCount || 1)).toFixed(1)}</span>
           </div>
         </div>
 
@@ -108,7 +135,9 @@ export function PostCard({ post }: PostCardProps) {
                   max={5} 
                   step={1} 
                   value={rating} 
-                  onValueChange={handleRatingChange}
+                  onValueChange={handleRatingPreview}
+                  onValueCommit={handleRatingCommit}
+                  disabled={submittingRating}
                   className="w-full"
                 />
              </div>
@@ -121,9 +150,11 @@ export function PostCard({ post }: PostCardProps) {
 
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" className="h-8 px-2 space-x-1">
+          <Button asChild variant="ghost" size="sm" className="h-8 px-2 space-x-1">
+            <Link href={`/blooming/${post.postId}`}>
             <MessageCircle className="h-4 w-4" />
             <span className="text-xs">Comment</span>
+            </Link>
           </Button>
           <Button variant="ghost" size="sm" className="h-8 px-2">
             <Share2 className="h-4 w-4" />
